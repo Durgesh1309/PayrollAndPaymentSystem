@@ -42,7 +42,7 @@ public class Vendor {
     @NotBlank(message = "Contact number is mandatory")
     @Pattern(regexp = "\\d{10}", message = "Contact number must be exactly 10 digits")
     @Column(nullable = false)
-    private String vendorContactno;
+    private String vendorContactNo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false)

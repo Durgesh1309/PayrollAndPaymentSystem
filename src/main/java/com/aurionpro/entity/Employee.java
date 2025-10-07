@@ -53,7 +53,7 @@ public class Employee {
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
-    private Set<SalaryStructure> salarySlips = new HashSet<>();
+    private Set<SalaryStructure> salaryStructures = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
