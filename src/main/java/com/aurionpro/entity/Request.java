@@ -1,10 +1,8 @@
 package com.aurionpro.entity;
 
+import java.time.LocalDate;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "requests")
@@ -19,36 +17,31 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "request_id")
     private Long requestId;
-    
-    @Column(name="request_type")
+
+    @Column(name = "request_type")
     private String requestType;
-    
-    @Column(name="request_status")
+
+    @Column(name = "request_status")
     private String requestStatus;
-    
-    @Column(name="description")
+
+    @Column(name = "description")
     private String description;
-    
-    @Column(name="request_date")
+
+    @Column(name = "request_date")
     private LocalDate requestDate;
-    
-    @Column(name="action_date")
+
+    @Column(name = "action_date")
     private LocalDate actionDate;
-    
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "adminId")
+    @JoinColumn(name = "admin_id")
     private Admin admin;
 
-
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="organizationId",nullable=false)
-    private Organization organization;
-    
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employeeId", nullable = false)
-    private Employee employee;
-    
-    
-}
+    @JoinColumn(name = "organization_id", nullable = false)
+    private Organization organization;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id", nullable = false)
+    private Employee employee;
+}

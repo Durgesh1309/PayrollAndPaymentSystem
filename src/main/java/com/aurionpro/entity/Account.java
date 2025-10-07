@@ -1,13 +1,12 @@
 package com.aurionpro.entity;
 
 import java.math.BigDecimal;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
 @Entity
-@Table(name = "accounts", indexes = @Index(columnList = "accountnumber", unique = true))
+@Table(name = "accounts", indexes = @Index(columnList = "accountNumber", unique = true))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,30 +28,27 @@ public class Account {
     private AccountType accountType;
 
     @PositiveOrZero(message = "Balance cannot be negative")
-    @Column(name="balance")
-    private BigDecimal  balance;
+    @Column(name = "balance", precision = 19, scale = 4)
+    private BigDecimal balance;
 
     @Column(nullable = false)
     private boolean active = true;
-    
-  
-    @ManyToOne
-    @JoinColumn(name="organizationId",nullable=false)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id", nullable = true)
     private Organization organization;
-    
-    @ManyToOne
-    @JoinColumn(name="employeeId",nullable=false)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id", nullable = true)
     private Employee employee;
-    
-    @OneToOne
-    @JoinColumn(name="vendor_id",nullable=false)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vendor_id", nullable = true)
     private Vendor vendor;
-    
-    
-    
+
     public enum AccountType {
         ORGANIZATION,
         EMPLOYEE,
-       
+        VENDOR
     }
 }
