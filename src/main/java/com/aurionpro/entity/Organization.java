@@ -3,7 +3,6 @@ package com.aurionpro.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -14,40 +13,30 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class Organization {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long organizationId;
+    private Long id;
 
-    @NotBlank
-    @Size(min = 2, max = 120)
-    @Pattern(regexp = "^[A-Za-z\\s]+$", message = "Organization name must contain only letters and spaces")
-    @Column(name = "organization_name", nullable = false, length = 120)
-    private String organizationName;
+    @NotBlank(message = "Organization name is mandatory")
+    @Size(max = 100)
+    @Column(nullable = false, unique = true, length = 100)
+    private String name;
 
-    @NotBlank
-    @Email
-    @Size(max = 254)
-    @Column(nullable = false, length = 254, unique = true)
-    private String organizationEmail;
+    @NotBlank(message = "Email is mandatory")
+    @Email(message = "Email should be valid")
+    @Size(max = 100)
+    @Column(nullable = false, unique = true, length = 100)
+    private String email;
 
-    @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @Builder.Default
-    private Set<Account> accounts = new HashSet<>();
+    @NotBlank(message = "Phone number is mandatory")
+    @Size(min = 10, max = 15)
+    @Column(nullable = false, length = 15)
+    private String phoneNumber;
 
-    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Builder.Default
-    private Set<Vendor> vendors = new HashSet<>();
+    @NotBlank(message = "Status is mandatory")
+    @Column(nullable = false, length = 20)
+    private String status; // Pending, Verified, Rejected
 
-    @OneToMany(mappedBy = "organization")
-    @Builder.Default
-    private Set<Document> documents = new HashSet<>();
-
-    @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @Builder.Default
-    private Set<Request> requests = new HashSet<>();
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<User> users;
 }

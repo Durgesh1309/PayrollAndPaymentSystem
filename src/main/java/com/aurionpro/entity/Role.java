@@ -14,14 +14,13 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class Role {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roleId;
 
-    @NotBlank(message = "Role name is required")
-    @Size(min = 3, max = 50, message = "Role name must be between 3 and 50 characters")
-    @Pattern(regexp = "^[A-Z_]+$", message = "Role name must be uppercase letters and underscores")
+    @NotBlank
+    @Size(min = 3, max = 50)
+    @Pattern(regexp = "^[A-Z_]+$")
     @Column(name = "role_name", nullable = false, length = 50, unique = true)
     private String roleName;
 

@@ -1,10 +1,10 @@
 package com.aurionpro.entity;
 
+import com.aurionpro.enums.RoleType;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "employees")
@@ -17,54 +17,34 @@ public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long employeeId;
+    private Long id;
 
-    @NotBlank
-    @Size(min = 2, max = 120)
-    @Pattern(regexp = "^[A-Za-z\\s]+$", message = "Employee name must contain only letters and spaces")
-    @Column(name = "employee_name", nullable = false, length = 120)
-    private String employeeName;
+    @NotBlank(message = "Employee name is mandatory")
+    @Size(max = 100)
+    @Column(nullable = false, length = 100)
+    private String name;
 
-    @NotBlank
-    @Email
-    @Size(max = 254)
-    @Column(nullable = false, length = 254, unique = true)
-    private String employeeEmail;
+    @NotBlank(message = "Email is mandatory")
+    @Email(message = "Email should be valid")
+    @Size(max = 100)
+    @Column(unique = true, nullable = false, length = 100)
+    private String email;
+
+    @NotBlank(message = "Password is mandatory")
+    @Size(min = 8, message = "Password must be at least 8 characters")
+    @Column(nullable = false)
+    private String password;
 
     @NotBlank(message = "Contact number is mandatory")
-    @Pattern(regexp = "\\d{10}", message = "Contact number must be exactly 10 digits")
-    @Column(nullable = false)
-    private String employeeContactNo;
+    @Size(min = 10, max = 15)
+    @Column(nullable = false, length = 15)
+    private String contactNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id", nullable = false)
+    @JoinColumn(name="organization_id", nullable=false)
     private Organization organization;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
-    private Account account;
-
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @Builder.Default
-    private Set<Document> documents = new HashSet<>();
-
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Builder.Default
-    private Set<SalaryStructure> salarySlips = new HashSet<>();
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Employee)) return false;
-        Employee e = (Employee) o;
-        return employeeId != null && employeeId.equals(e.employeeId);
-    }
-
-    @Override
-    public int hashCode() {
-        return 31;
-    }
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private RoleType role;
 }
