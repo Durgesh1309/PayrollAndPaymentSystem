@@ -11,7 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,30 +31,41 @@ public class Document {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long documentId;
 
-    @NotBlank
-    @Column(nullable = false, length = 150)
+    @NotNull
+    @Column(nullable = false)
     private String documentName;
 
-    @NotBlank
-    @Column(nullable = false, length = 50)
-    private String documentType;  // e.g., "License", "Certificate", etc.
-
-    @NotBlank
-    @Column(nullable = false, length = 3000)
-    private String documentUrl;   // Singluar URL or if multiple URLs use JSON string/list representation
-
+    @NotNull
     @Column(nullable = false)
-    private LocalDateTime uploadedAt; // Stores upload date/time of the document
+    private String documentType;  // e.g., PAN Card, License, Tax ID
 
-    @Column(nullable = false, length = 30)
-    private String status; // e.g., "Pending", "Verified", "Rejected"
+    @NotNull
+    @Column(nullable = false)
+    private String documentUrl;
+
+    @Column(length = 20)
+    private String status;  // Pending, Approved, Rejected
+
+    @Column
+    private LocalDateTime uploadedAt;
+
+    @Column
+    private LocalDateTime verifiedAt;
+    
+    @Column(length = 255)
+    private String rejectionReason;
+    private Long verifiedByUserId;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id", nullable = true)
+    @JoinColumn(name = "organization_id")
     private Organization organization;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id", nullable = true)
+    @JoinColumn(name = "employee_id")
     private Employee employee;
 
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "vendor_id")
+//    private Vendor vendor;
 }
