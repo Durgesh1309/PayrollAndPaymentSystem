@@ -28,10 +28,8 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (employee != null) {
-            // Employee enum like ADMIN, ORGANIZATION -> add ROLE_ prefix once
             return List.of(new SimpleGrantedAuthority("ROLE_" + employee.getRole().name()));
         } else if (user != null) {
-            // Role.roleName already stores ROLE_ADMIN / ROLE_ORGANIZATION -> do NOT add prefix again
             return user.getRoles().stream()
                     .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
                     .collect(Collectors.toList());
