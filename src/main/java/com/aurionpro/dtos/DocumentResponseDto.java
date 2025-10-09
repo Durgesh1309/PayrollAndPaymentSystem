@@ -14,4 +14,9 @@ public class DocumentResponseDto {
     private String uploadedAt;
     private String verifiedAt;
     private Long verifiedByUserId;
+
+    // Employee details for traceability
+    private Long employeeId;
+    private String employeeName;
+    private String employeeEmail;
 }

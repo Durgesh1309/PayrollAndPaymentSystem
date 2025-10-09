@@ -8,8 +8,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface DocumentService {
-    DocumentResponseDto uploadForOrganization(MultipartFile file, UploadMetadata meta);
+    DocumentResponseDto uploadForOrganization(MultipartFile file, UploadMetadata meta, Long employeeId);
     List<DocumentResponseDto> listOrganizationDocs(Long orgId);
     List<DocumentResponseDto> listPendingDocs();
     DocumentResponseDto verify(Long documentId, DocumentVerifyRequest req, Long verifierUserId);
+    List<DocumentResponseDto> listEmployeeDocuments(Long employeeId);
+    List<DocumentResponseDto> listEmployeeUploadedDocs(Long organizationId);
+
 }
