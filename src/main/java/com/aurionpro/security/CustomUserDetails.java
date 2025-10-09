@@ -15,15 +15,18 @@ public class CustomUserDetails implements UserDetails {
 
     private final Employee employee;
     private final User user;
+    private final Long organizationId; // Added for org users
 
     public CustomUserDetails(Employee employee) {
         this.employee = employee;
         this.user = null;
+        this.organizationId = employee.getOrganization() != null ? employee.getOrganization().getId() : null;
     }
 
     public CustomUserDetails(User user) {
         this.user = user;
         this.employee = null;
+        this.organizationId = user.getOrganization() != null ? user.getOrganization().getId() : null;
     }
 
     @Override
@@ -53,12 +56,15 @@ public class CustomUserDetails implements UserDetails {
     @Override public boolean isCredentialsNonExpired() { return true; }
     @Override public boolean isEnabled() { return true; }
 
-    // Add these getter methods to fetch IDs for logged-in user/employee
     public Long getEmployeeId() {
         return employee != null ? employee.getId() : null;
     }
 
     public Long getUserId() {
         return user != null ? user.getUserId() : null;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
     }
 }

@@ -49,17 +49,21 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional
-    public DocumentResponseDto uploadForOrganization(MultipartFile file, UploadMetadata meta, Long employeeId) {
-        // ... validations as before ...
+    public DocumentResponseDto uploadForOrganization(MultipartFile file, UploadMetadata meta, Long id) {
+        Organization org;
+        Employee emp = null;
 
-        Organization org = organizationRepository.findById(meta.getOrganizationId())
-                .orElseThrow(() -> new CustomException("Organization not found"));
+        if (id == null) {
+            throw new CustomException("Invalid ID provided");
+        }
 
-        Employee emp = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new CustomException("Employee not found"));
-
-        if (!org.getId().equals(emp.getOrganization().getId())) {
-            throw new CustomException("Employee does not belong to the provided organization");
+        // Determine if ID is employee or organization
+        emp = employeeRepository.findById(id).orElse(null);
+        if (emp != null) {
+            org = emp.getOrganization();
+        } else {
+            org = organizationRepository.findById(id)
+                    .orElseThrow(() -> new CustomException("Organization not found"));
         }
 
         try {
@@ -102,34 +106,48 @@ public class DocumentServiceImpl implements DocumentService {
         Document doc = documentRepository.findById(documentId)
                 .orElseThrow(() -> new CustomException("Document not found"));
 
-        if (doc.getEmployee() == null) {
-            throw new CustomException("Document does not belong to any employee");
+        // Handle both organization and employee
+        boolean belongsToEmployee = doc.getEmployee() != null;
+        boolean belongsToOrganization = doc.getOrganization() != null;
+
+        if (!belongsToEmployee && !belongsToOrganization) {
+            throw new CustomException("Document is not linked to any employee or organization");
         }
 
         String action = Objects.toString(req.getAction(), "").toUpperCase(Locale.ROOT);
+
         switch (action) {
             case "APPROVE" -> {
                 doc.setStatus("Approved");
                 doc.setVerifiedAt(LocalDateTime.now());
                 doc.setVerifiedByUserId(verifierUserId);
-                if (!"Verified".equalsIgnoreCase(doc.getOrganization().getStatus())) {
+
+                // If document belongs to an organization, mark org as verified
+                if (belongsToOrganization && !"Verified".equalsIgnoreCase(doc.getOrganization().getStatus())) {
                     doc.getOrganization().setStatus("Verified");
                     organizationRepository.save(doc.getOrganization());
                 }
+
+                // If belongs to employee, we can later add employee verification logic
             }
+
             case "REJECT" -> {
                 if (req.getRejectionReason() == null || req.getRejectionReason().isBlank()) {
                     throw new CustomException("Rejection reason is required");
                 }
+
                 doc.setStatus("Rejected");
                 doc.setVerifiedAt(LocalDateTime.now());
                 doc.setVerifiedByUserId(verifierUserId);
                 doc.setRejectionReason(req.getRejectionReason());
             }
+
             default -> throw new CustomException("Invalid action, must be APPROVE or REJECT");
         }
+
         return toDto(documentRepository.save(doc));
     }
+
     @Override
     public List<DocumentResponseDto> listEmployeeDocuments(Long employeeId) {
         Employee employee = employeeRepository.findById(employeeId)

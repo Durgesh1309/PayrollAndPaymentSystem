@@ -42,7 +42,25 @@ public class DocumentController {
             Principal principal) {
 
         Long employeeId = getLoggedInEmployeeId(principal);
-        return ResponseEntity.ok(documents.uploadForOrganization(file, meta, employeeId));
+        Long organizationId = getLoggedInOrganizationId(principal);
+
+        if (employeeId != null) {
+            return ResponseEntity.ok(documents.uploadForOrganization(file, meta, employeeId));
+        } else if (organizationId != null) {
+            return ResponseEntity.ok(documents.uploadForOrganization(file, meta, organizationId));
+        } else {
+            throw new IllegalStateException("Logged in user has neither employee nor organization ID");
+        }
+    }
+    
+    private Long getLoggedInOrganizationId(Principal principal) {
+        if (principal instanceof Authentication authentication) {
+            Object userObject = authentication.getPrincipal();
+            if (userObject instanceof CustomUserDetails customUserDetails) {
+                return customUserDetails.getOrganizationId();
+            }
+        }
+        return null;
     }
 
 
@@ -58,7 +76,7 @@ public class DocumentController {
         return ResponseEntity.ok(documents.listPendingDocs());
     }
 
-    @PreAuthorize("hasRole('ORGANIZATION')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZATION')")
     @PostMapping("/{documentId}/verify")
     public ResponseEntity<DocumentResponseDto> verify(
             @PathVariable Long documentId,

@@ -14,6 +14,8 @@ import com.aurionpro.service.EmailerService;
 import com.aurionpro.service.EmployeeService;
 
 import jakarta.mail.MessagingException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 import org.modelmapper.ModelMapper;
@@ -38,6 +40,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
     private static final int TEMP_PASSWORD_LENGTH = 12;
+    
+    @PersistenceContext
+    private EntityManager entityManager;
+
 
     public EmployeeServiceImpl(EmployeeRepository employeeRepository, OrganizationRepository organizationRepository,
                               UserRepository userRepository, EmailerService emailerService,
@@ -57,26 +63,44 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (loggedInOrgId == null || !loggedInOrgId.equals(req.getOrganizationId())) {
             throw new CustomException("Cannot add employees for other organizations");
         }
+
         Organization org = organizationRepository.findById(req.getOrganizationId())
                 .orElseThrow(() -> new CustomException("Organization not found"));
+
+        // Ensure we have the latest DB state (after admin verification)
+        entityManager.refresh(org);
+
         if (!"Verified".equalsIgnoreCase(org.getStatus())) {
             throw new CustomException("Organization is not verified");
         }
+
         if (employeeRepository.existsByEmail(req.getEmail())) {
             throw new CustomException("Employee with this email already exists");
         }
+
         String tempPassword = generateTemporaryPassword();
+
+        // Map DTO -> Entity but guard against ModelMapper copying IDs
         Employee emp = modelMapper.map(req, Employee.class);
+        emp.setId(null);                      // important: force INSERT
         emp.setOrganization(org);
         emp.setPassword(passwordEncoder.encode(tempPassword));
         emp.setRole(RoleType.EMPLOYEE);
-        employeeRepository.save(emp);
+
+        // Optional: clear persistence context to avoid stale instances (uncomment if needed)
+        // entityManager.clear();
+
+        // Persist immediately so any DB errors surface now
+        employeeRepository.saveAndFlush(emp);
+
         try {
             emailerService.sendWelcomeEmailWithTempPassword(emp.getEmail(), tempPassword, org.getName());
         } catch (MessagingException ex) {
             throw new CustomException("Failed to send credentials email: " + ex.getMessage());
         }
     }
+
+
 
     @Override
     @Transactional
