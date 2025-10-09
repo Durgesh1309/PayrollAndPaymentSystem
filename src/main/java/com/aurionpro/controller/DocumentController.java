@@ -30,7 +30,6 @@ public class DocumentController {
             @RequestPart("file") MultipartFile file,
             @Valid @RequestPart("meta") UploadMetadata meta,
             Principal principal) {
-        // Optionally validate the principal belongs to the organization in meta
         return ResponseEntity.ok(documents.uploadForOrganization(file, meta));
     }
 
@@ -52,9 +51,7 @@ public class DocumentController {
             @PathVariable Long documentId,
             @Valid @RequestBody DocumentVerifyRequest req,
             Principal principal) {
-        // Look up verifierUserId from principal if needed
-        Long verifierUserId = null;
+        Long verifierUserId = null; // lookup from principal if needed
         return ResponseEntity.ok(documents.verify(documentId, req, verifierUserId));
     }
 }
-

@@ -23,7 +23,11 @@ import jakarta.validation.Valid;
 public class EmployeeController {
 
     private final EmployeeService employeeService;
-    public EmployeeController(EmployeeService employeeService) { this.employeeService = employeeService; }
+
+    public EmployeeController(EmployeeService employeeService) { 
+        this.employeeService = employeeService; 
+    }
+
     @PostMapping("/add")
     public ResponseEntity<?> addSingle(@Valid @RequestBody EmployeeAddRequest req, Principal principal) {
         try {
@@ -33,7 +37,6 @@ public class EmployeeController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
 
     @PreAuthorize("hasRole('ORGANIZATION')")
     @PostMapping("/add/bulk")
